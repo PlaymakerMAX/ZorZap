@@ -8,6 +8,11 @@ namespace ZorZap.Infrastructure.Repositories;
 
 public class ScanReportRepository(ZorZapDbContext context) : IScanReportRepository
 {
+    public async Task AddAsync(ScanReport report)
+    {
+        await context.ScanReports.AddAsync(report);
+        await context.SaveChangesAsync();
+    }
     public async Task<IEnumerable<ScanReport>> GetAllAsync()
     {
         return await context.ScanReports.ToListAsync();
