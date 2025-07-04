@@ -26,6 +26,7 @@ public class ZapScanService : IZapScanService
         var versionUrl = $"{_zapApiBaseUrl}/core/view/version/?apikey={_apiKey}";
         
         // On fait un appel GET pour tester la connexion
+        
         var response = await _httpClient.GetAsync(versionUrl);
         response.EnsureSuccessStatusCode(); // Lève une exception si l'appel échoue
 
