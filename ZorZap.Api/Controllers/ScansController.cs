@@ -28,7 +28,7 @@ public class ScansController(
 
         // On met le vrai scan en file d'attente pour qu'il s'exécute en arrière-plan
         backgroundJobClient.Enqueue<IZapScanService>(service =>
-            service.StartFullScanAsync(newReport.TargetUrl));
+            service.StartFullScanAsync(newReport.TargetUrl, newReport.ReportName));
 
         // On utilise 202 Accepted pour indiquer que la tâche est acceptée mais pas encore terminée
         return Accepted(newReport);

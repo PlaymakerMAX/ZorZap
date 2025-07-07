@@ -2,5 +2,7 @@ namespace ZorZap.Core.Interfaces;
 
 public interface IZapScanService
 {
-    Task StartFullScanAsync(string targetUrl);
+    /// Démarre un scan complet sur l'URL cible et génère un rapport.
+    Task StartFullScanAsync(string targetUrl, string reportName);
+
 }

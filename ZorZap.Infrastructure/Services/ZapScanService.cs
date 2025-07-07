@@ -18,22 +18,23 @@ public class ZapScanService : IZapScanService
         _httpClient = new HttpClient { Timeout = TimeSpan.FromHours(24) };
     }
 
-    public async Task StartFullScanAsync(string targetUrl)
+    public async Task StartFullScanAsync(string targetUrl, string reportName)
     {
-        Console.WriteLine($"--- Début du Full Scan sur {targetUrl} ---");
+        Console.WriteLine($"--- Début du Full Scan sur {targetUrl} pour le rapport '{reportName}' ---");
 
-        // Étape 1 : Lancer le Spider pour découvrir les URL
         var spiderScanId = await StartSpider(targetUrl);
         await WaitForTaskCompletion($"{_zapApiBaseUrl}/spider/view/status/?scanId={spiderScanId}", "Spider");
 
-        // Étape 2 : Lancer le Scan Actif sur les URL découvertes
         var activeScanId = await StartActiveScan(targetUrl);
         await WaitForTaskCompletion($"{_zapApiBaseUrl}/ascan/view/status/?scanId={activeScanId}", "Active Scan");
 
-        // Étape 3 : Générer le rapport final
-        await GenerateReport(targetUrl);
+        // On ajoute une courte pause pour s'assurer que ZAP est prêt.
+        Console.WriteLine("Scan terminé. Attente de 5 secondes pour la finalisation des rapports ZAP...");
+        await Task.Delay(5000);
+
+        await GenerateReports(reportName);
         
-        Console.WriteLine($"--- Full Scan sur {targetUrl} terminé ! ---");
+        Console.WriteLine($"--- Full Scan pour le rapport '{reportName}' terminé ! ---");
     }
 
     private async Task<string> StartSpider(string targetUrl)
@@ -57,7 +58,6 @@ public class ZapScanService : IZapScanService
         int progress = 0;
         while (progress < 100)
         {
-            // On attend 10 secondes entre chaque vérification pour ne pas surcharger l'API
             await Task.Delay(10000); 
             var statusResponse = await _httpClient.GetFromJsonAsync<ZapStatusResponse>($"{statusUrl}&apikey={_apiKey}");
             progress = int.Parse(statusResponse?.status ?? "0");
@@ -66,26 +66,44 @@ public class ZapScanService : IZapScanService
         Console.WriteLine($"{taskName} terminé.");
     }
 
-    // Fichier : ZapScanService.cs
-
-    private async Task GenerateReport(string targetUrl)
+    private async Task GenerateReports(string reportName)
     {
-        // On crée un nom de fichier simple et unique, sans l'URL
-        var fileName = $"ZAP_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.html";
-    
-        // Le dossier de destination est simplement /zap/wrk/
-        var reportDir = "/zap/wrk/";
+        try
+        {
+            // --- Génération du Rapport HTML ---
+            Console.WriteLine("Génération du rapport HTML...");
+            var htmlUrl = $"{_zapApiBaseUrl}/core/other/htmlreport/?apikey={_apiKey}";
+            var reportHtml = await _httpClient.GetStringAsync(htmlUrl);
+            await SaveReportToFile(reportName, reportHtml, "html");
 
-        // On utilise le bon endpoint avec les bons paramètres
-        var url = $"{_zapApiBaseUrl}/reports/action/generate/?apikey={_apiKey}&title=ZorZap+Scan+Report&template=traditional-html&reportDir={reportDir}&fileName={fileName}";
-    
-        var response = await _httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode(); 
+            // --- MODIFICATION : Génération du Rapport JSON ---
+            Console.WriteLine("Génération du rapport JSON...");
+            var jsonUrl = $"{_zapApiBaseUrl}/core/other/jsonreport/?apikey={_apiKey}"; // <-- Endpoint changé
+            var reportJson = await _httpClient.GetStringAsync(jsonUrl); // <-- Variable renommée
+            await SaveReportToFile(reportName, reportJson, "json"); // <-- Extension changée
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERREUR lors de la génération ou sauvegarde des rapports : {ex.Message}");
+        }
+    }
+     
+    private async Task SaveReportToFile(string reportName, string content, string extension)
+    {
+        // Sanitize the report name to avoid invalid characters
+        var sanitizedName = string.Join("_", reportName.Split(Path.GetInvalidFileNameChars()));    
+        var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        // Create a unique file name with timestamp
+        var fileName = $"{sanitizedName}_{timestamp}.{extension}";
+        // Ensure the directory exists    
+        var fullPathOnHost = Path.Combine(@"C:\zap-data", fileName);
 
-        Console.WriteLine($"Demande de génération de rapport envoyée à ZAP. Il sera sauvegardé dans : {reportDir}{fileName}");
+        await File.WriteAllTextAsync(fullPathOnHost, content);
+        // Log the file path
+        Console.WriteLine($"Rapport '{fileName}' généré et sauvegardé avec succès dans : C:\\zap-data");
     }
 }
 
-// Classes pour désérialiser les réponses JSON de ZAP, nécessaires pour que GetFromJsonAsync fonctionne
+// Classes pour désérialiser les réponses JSON de ZAP
 public class ZapScanResponse { public string? Scan { get; set; } }
 public class ZapStatusResponse { public string? status { get; set; } }
