@@ -13,10 +13,6 @@ public class ScanReportRepository(ZorZapDbContext context) : IScanReportReposito
         await context.ScanReports.AddAsync(report);
         await context.SaveChangesAsync();
     }
-    public async Task<IEnumerable<ScanReport>> GetAllAsync()
-    {
-        return await context.ScanReports.ToListAsync();
-    }
 }
 // This code defines a repository for managing scan reports in a database using Entity Framework Core.
 // The `ScanReportRepository` class implements the `IScanReportRepository` interface and provides

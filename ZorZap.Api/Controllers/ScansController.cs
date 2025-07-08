@@ -33,13 +33,6 @@ public class ScansController(
         // On utilise 202 Accepted pour indiquer que la tâche est acceptée mais pas encore terminée
         return Accepted(newReport);
     }
-
-    [HttpGet]
-    public async Task<IActionResult> Get()
-    {
-        var reports = await repository.GetAllAsync();
-        return Ok(reports);
-    }
 }
 // Ce contrôleur gère les requêtes liées aux scans.
 // Il permet de créer un nouveau scan et de récupérer la liste des scans existants.
