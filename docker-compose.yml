@@ -1,0 +1,68 @@
+# docker-compose.yml - VERSION CORRIGÉE
+
+# La déclaration 'version' est obsolète, nous la supprimons pour un fichier plus propre.
+
+services:
+  # Service 1: Jenkins
+  jenkins:
+    image: jenkins/jenkins:lts-jdk11
+    container_name: jenkins-zorzap
+    privileged: true
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - zorzap-net  # <-- Ajout du réseau
+
+  # Service 2: PostgreSQL
+  zordb:
+    image: postgres:15-alpine
+    container_name: zordb-zorzap
+    environment:
+      POSTGRES_USER: zoruser
+      POSTGRES_PASSWORD: zorpassword
+      POSTGRES_DB: zordb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # --- CORRECTION ICI ---
+      # On monte le dossier local 'iac/postgres' dans le dossier d'initialisation du conteneur.
+      - ./iac/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - zorzap-net  # <-- Ajout du réseau
+
+  # Service 3: Kanboard
+  kanboard:
+    image: kanboard/kanboard:latest
+    container_name: kanboard-zorzap
+    ports:
+      - "8888:80"
+    environment:
+      - DATABASE_URL=postgres://zoruser:zorpassword@zordb:5432/zordb
+    depends_on:
+      - zordb
+    volumes:
+      - kanboard-data:/var/www/app/data
+      - kanboard-plugins:/var/www/app/plugins
+    networks:
+      - zorzap-net  # <-- Ajout du réseau
+
+# Définition des volumes nommés pour la persistance
+volumes:
+  jenkins-data:
+  postgres-data:
+  kanboard-data:
+  kanboard-plugins:
+
+# Définition du réseau commun
+networks:
+  zorzap-net:
+    driver: bridge
+# Note: Le fichier docker-compose.yml a été corrigé pour supprimer la déclaration de version obsolète.
+# Il est maintenant plus propre et suit les bonnes pratiques.
+
