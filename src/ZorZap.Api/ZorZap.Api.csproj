@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ZorZap.Core\ZorZap.Core.csproj" />
     <ProjectReference Include="..\ZorZap.Infrastructure\ZorZap.Infrastructure.csproj" />
+    <ProjectReference Include="..\ZorZap.Application\ZorZap.Application.csproj" />
   </ItemGroup>
 
 </Project>

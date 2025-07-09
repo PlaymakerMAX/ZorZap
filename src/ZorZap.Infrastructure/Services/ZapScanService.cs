@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
-using ZorZap.Core.Interfaces;
+using ZorZap.Application.Interfaces;
 
 namespace ZorZap.Infrastructure.Services;
 

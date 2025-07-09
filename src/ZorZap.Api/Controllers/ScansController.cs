@@ -1,8 +1,9 @@
 // Fichier : ZorZap.Api/Controllers/ScansController.cs
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
-using ZorZap.Core.DTOs;
+using ZorZap.Application.DTOs;
 using ZorZap.Core.Entities;
+using ZorZap.Application.Interfaces;
 using ZorZap.Core.Interfaces;
 
 namespace ZorZap.Api.Controllers;

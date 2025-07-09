@@ -1,4 +1,4 @@
-namespace ZorZap.Core.DTOs;
+namespace ZorZap.Application.DTOs;
 
 public class CreateScanReportDto
 {

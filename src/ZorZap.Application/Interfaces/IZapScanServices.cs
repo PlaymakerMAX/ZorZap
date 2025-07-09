@@ -1,4 +1,4 @@
-namespace ZorZap.Core.Interfaces;
+namespace ZorZap.Application.Interfaces;
 
 public interface IZapScanService
 {

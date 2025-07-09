@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ZorZap.Core\ZorZap.Core.csproj" />
+    <ProjectReference Include="..\ZorZap.Application\ZorZap.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

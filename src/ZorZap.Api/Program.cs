@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ZorZap.Core.Interfaces;
 using ZorZap.Infrastructure.Persistence;
 using ZorZap.Infrastructure.Repositories;
+using ZorZap.Application.Interfaces;
 using Hangfire;
 
 // 2. Créer l'application Web
