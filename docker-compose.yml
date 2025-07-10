@@ -27,7 +27,7 @@ services:
       POSTGRES_PASSWORD: zorpassword
       POSTGRES_DB: zordb
     ports:
-      - "5432:5432"
+      - "5432:5432" 
     volumes:
       - postgres-data:/var/lib/postgresql/data
       # --- CORRECTION ICI ---
@@ -65,4 +65,3 @@ networks:
     driver: bridge
 # Note: Le fichier docker-compose.yml a été corrigé pour supprimer la déclaration de version obsolète.
 # Il est maintenant plus propre et suit les bonnes pratiques.
-
