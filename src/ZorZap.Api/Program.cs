@@ -5,31 +5,43 @@ using ZorZap.Infrastructure.Persistence;
 using ZorZap.Infrastructure.Repositories;
 using ZorZap.Application.Interfaces;
 using Hangfire;
+using Hangfire.PostgreSql; // <-- USING AJOUTÉ
 
 // 2. Créer l'application Web
 // C'est le point de départ de notre application.
 var builder = WebApplication.CreateBuilder(args);
 
+// --- DÉBUT DE LA MODIFICATION ---
+
+// On récupère la chaîne de connexion depuis appsettings.json UNE SEULE FOIS.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 // 2. Configurer les services (l'injection de dépendances)
 // On dit à notre application quels "outils" elle peut utiliser.
 
-// On enregistre le DbContext et on lui dit d'utiliser une base de données en mémoire.
+// On enregistre le DbContext et on lui dit d'utiliser PostgreSQL.
+// L'ancienne ligne "UseInMemoryDatabase" est supprimée.
 builder.Services.AddDbContext<ZorZapDbContext>(options => 
-    options.UseInMemoryDatabase("ZorZapDb"));
+    options.UseNpgsql(connectionString));
 
 // On fait le lien entre l'interface et sa classe concrète.
 // Quand un contrôleur demandera un "IScanReportRepository", le système lui donnera un "ScanReportRepository".
 builder.Services.AddScoped<IScanReportRepository, ScanReportRepository>();
 // On enregistre le service de scan ZAP.
 // Quand un contrôleur demandera un "IZapScanService", le système lui donnera un "ZapScanService".
-// C'est ici que nous ajoutons le service de scan ZAP.
-builder.Services.AddScoped<IZapScanService, ZorZap.Infrastructure.Services.ZapScanService>(); // <-- AJOUTEZ CETTE LIGNE
+builder.Services.AddScoped<IZapScanService, ZorZap.Infrastructure.Services.ZapScanService>();
 
-// On configure Hangfire pour gérer les tâches en arrière-plan.
-// Hangfire permet de planifier des tâches, comme lancer des scans à intervalles réguliers
-builder.Services.AddHangfire(config => config.UseInMemoryStorage());
+// On configure Hangfire pour qu'il utilise PostgreSQL comme stockage persistant.
+// L'ancienne ligne "UseInMemoryStorage" est remplacée.
+builder.Services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180) // Bonne pratique pour la compatibilité
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionString))); // On utilise la même connexion
+
 builder.Services.AddHangfireServer();
 
+// --- FIN DE LA MODIFICATION ---
 
 // On ajoute le service de configuration pour lire les paramètres de l'application.
 // On ajoute le support pour les contrôleurs d'API.
@@ -64,3 +76,4 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+// 4. Démarrer l'application
