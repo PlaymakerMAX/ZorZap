@@ -15,10 +15,10 @@ pipeline {
 
         // Étape 2: Compilation de l'application
         stage('Build') {
-            // Utilise un conteneur Docker avec le SDK.NET 6 comme environnement de build.
+            // Utilise un conteneur Docker avec le SDK.NET 8 comme environnement de build.
             // Jenkins téléchargera cette image si elle n'est pas présente localement.
             agent {
-                docker { image 'mcr.microsoft.com/dotnet/sdk:6.0' }
+                docker { image 'mcr.microsoft.com/dotnet/sdk:8.0' }
             }
             steps {
                 // Affiche la version du SDK.NET pour le débogage

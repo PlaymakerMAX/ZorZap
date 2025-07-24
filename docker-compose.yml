@@ -1,45 +1,27 @@
-# docker-compose.yml - VERSION CORRIGÉE
-
-# La déclaration 'version' est obsolète, nous la supprimons pour un fichier plus propre.
+# docker-compose.yml - VERSION FINALE
 
 services:
-  # Service 1: Jenkins
-  jenkins:
-    image: jenkins/jenkins:lts-jdk17
-    container_name: jenkins-zorzap
-    privileged: true
-    user: root
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    volumes:
-      - jenkins-data:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - zorzap-net  # <-- Ajout du réseau
-
-  # Service 2: PostgreSQL
   zordb:
     image: postgres:15-alpine
     container_name: zordb-zorzap
+    restart: always
     environment:
+      # Assurez-vous que ces valeurs sont correctes pour votre projet
       POSTGRES_USER: zoruser
       POSTGRES_PASSWORD: zorpassword
       POSTGRES_DB: zordb
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      # --- CORRECTION ICI ---
-      # On monte le dossier local 'iac/postgres' dans le dossier d'initialisation du conteneur.
       - ./iac/postgres:/docker-entrypoint-initdb.d
     networks:
-      - zorzap-net  # <-- Ajout du réseau
+      - zorzap-net
 
-  # Service 3: Kanboard
   kanboard:
     image: kanboard/kanboard:latest
     container_name: kanboard-zorzap
+    restart: always
     ports:
       - "8888:80"
     environment:
@@ -50,18 +32,38 @@ services:
       - kanboard-data:/var/www/app/data
       - kanboard-plugins:/var/www/app/plugins
     networks:
-      - zorzap-net  # <-- Ajout du réseau
+      - zorzap-net
 
-# Définition des volumes nommés pour la persistance
+  jenkins:
+    # On donne un nom à l'image que l'on construit
+    image: zorzap-jenkins:custom
+    # On indique où trouver le Dockerfile
+    build:
+      context: ./iac/jenkins
+    container_name: jenkins-zorzap
+    restart: always
+    privileged: true
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      # Le nom du volume ici doit correspondre à la déclaration ci-dessous
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - zorzap-net
+
+# --- Déclaration des Volumes et du Réseau ---
+# Cette section doit être tout en bas et sans indentation
+
 volumes:
-  jenkins-data:
   postgres-data:
   kanboard-data:
   kanboard-plugins:
+  jenkins-data:
 
-# Définition du réseau commun
 networks:
   zorzap-net:
     driver: bridge
-# Note: Le fichier docker-compose.yml a été corrigé pour supprimer la déclaration de version obsolète.
-# Il est maintenant plus propre et suit les bonnes pratiques.
+    
