@@ -34,26 +34,26 @@ pipeline {
         stage('Test') {
             // Réutilise le même environnement que l'étape de build.
             agent {
-                docker { image 'mcr.microsoft.com/dotnet/sdk:6.0' }
+                docker { image 'mcr.microsoft.com/dotnet/sdk:8.0' }
             }
             steps {
                 // Exécute les tests sans recompiler et génère un rapport de résultats au format trx.
                 sh 'dotnet test ZorZap.sln --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"'
             }
-            post {
+            //post {
                 // 'always' s'exécute que l'étape ait réussi ou échoué.
-                always {
+              //  always {
                     // Archive les résultats des tests pour qu'ils soient visibles dans l'interface Jenkins.
                     // Cela permet de suivre l'historique des tests et d'analyser les échecs.
-                    junit '**/test-results.trx'
-                }
-            }
+                //    junit '**/test-results.trx'
+             //   }
+            //}
         }
 
         // Étape 4: Publication des artéfacts
         stage('Publish') {
             agent {
-                docker { image 'mcr.microsoft.com/dotnet/sdk:6.0' }
+                docker { image 'mcr.microsoft.com/dotnet/sdk:8.0' }
             }
             steps {
                 // Publie l'API dans une configuration optimisée pour la production.
