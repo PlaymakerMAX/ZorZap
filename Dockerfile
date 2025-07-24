@@ -1,6 +1,6 @@
 # --- Étape 1: Build ---
 # Utilise l'image du SDK.NET 6 pour la compilation. Nommée 'build-env' pour référence ultérieure.
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /app
 
 # Copie les fichiers.csproj et.sln et restaure les dépendances en premier.
@@ -20,7 +20,7 @@ RUN dotnet publish -c Release -o /app/publish
 
 # --- Étape 2: Production ---
 # Utilise l'image de runtime ASP.NET, beaucoup plus légère que l'image du SDK.
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
 # Copie les artéfacts publiés de l'étape de build ('build-env') vers l'image finale.
