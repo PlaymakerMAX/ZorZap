@@ -59,7 +59,7 @@ pipeline {
                 // Publie l'API dans une configuration optimisée pour la production.
                 // Le résultat est placé dans le dossier './app/publish' du workspace Jenkins,
                 // qui sera utilisé pour construire l'image Docker finale.
-                sh 'dotnet publish./src/ZorZap.Api/ZorZap.Api.csproj -c Release -o./app/publish'
+                sh 'dotnet publish ./src/ZorZap.Api/ZorZap.Api.csproj -c Release -o./app/publish'
             }
         }
 
