@@ -5,7 +5,7 @@
 services:
   # Service 1: Jenkins
   jenkins:
-    image: jenkins/jenkins:lts-jdk11
+    image: jenkins/jenkins:lts-jdk17
     container_name: jenkins-zorzap
     privileged: true
     user: root
